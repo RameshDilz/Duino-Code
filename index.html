@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>PWM Light Designer v0.3</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+    margin:0;
+    padding:20px;
+    background:#101010;
+    color:white;
+    font-family:Arial, sans-serif;
+}
+
+
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+
+
+h1{
+    text-align:center;
+    color:#00ff88;
+    font-size:36px;
+}
+
+
+.card{
+
+    background:#1e1e1e;
+    padding:20px;
+    margin:20px 0;
+    border-radius:15px;
+    box-shadow:0 0 20px #000;
+
+}
+
+
+h2{
+
+    color:#00ff88;
+
+}
+
+
+
+label{
+
+    display:block;
+    margin-top:15px;
+    color:#aaa;
+
+}
+
+
+
+input,select{
+
+    width:100%;
+    padding:12px;
+    margin-top:5px;
+    border:none;
+    border-radius:8px;
+    background:#303030;
+    color:white;
+
+}
+
+
+
+button{
+
+    margin-top:15px;
+    padding:12px 25px;
+    border:none;
+    border-radius:10px;
+    background:#00c853;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+
+}
+
+
+button:hover{
+
+    background:#00ff66;
+
+}
+
+
+
+.info{
+
+    margin-top:15px;
+    padding:15px;
+    background:#252525;
+    border-radius:10px;
+    color:#00ff88;
+
+}
+
+
+
+.channelBox{
+
+    display:flex;
+    align-items:center;
+    gap:20px;
+    background:#252525;
+    margin:10px 0;
+    padding:12px;
+    border-radius:10px;
+
+}
+
+
+
+.channelBox select{
+
+    width:220px;
+
+}
+
+
+
+.warning{
+
+    color:#ffcc00;
+    margin-top:10px;
+
+}
+
+
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+
+td,th{
+
+    border:1px solid #555;
+    padding:10px;
+    text-align:center;
+
+}
+
+
+
+.cell{
+
+    width:35px;
+    height:35px;
+    background:#333;
+    margin:auto;
+    border-radius:8px;
+    cursor:pointer;
+
+}
+
+
+.cell.on{
+
+    background:#00ff66;
+    box-shadow:0 0 15px #00ff66;
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>💡 PWM Light Designer</h1>
+
+
+
+<div class="card">
+
+
+<h2>Project Setup</h2>
+
+
+<label>
+Project Name
+</label>
+
+<input id="projectName"
+placeholder="My Light Project">
+
+
+
+<label>
+Select Board
+</label>
+
+
+<select id="board"
+onchange="boardChanged()">
+
+<option>Arduino UNO</option>
+<option>Arduino Nano</option>
+<option>Arduino Mega</option>
+<option>ESP8266</option>
+<option>ESP32</option>
+
+</select>
+
+
+
+<label>
+Pin Selection Mode
+</label>
+
+
+<select id="pinMode"
+onchange="modeChanged()">
+
+<option value="safe">
+Safe Mode
+</option>
+
+
+<option value="custom">
+Custom Mode
+</option>
+
+
+</select>
+
+
+
+
+<div class="info">
+
+
+Board:
+<span id="boardInfo">
+Arduino UNO
+</span>
+
+<br><br>
+
+Available Pins:
+<span id="pinInfo">
+0
+</span>
+
+
+<br><br>
+
+Maximum Channels:
+<span id="maxInfo">
+0
+</span>
+
+
+</div>
+
+
+
+
+<label>
+Channel Count
+</label>
+
+
+<input id="channelCount"
+type="number"
+onchange="channelLimitCheck()">
+
+
+
+<button onclick="createChannels()">
+
+Create Channels
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+<div class="card">
+
+
+<h2>Channel Pin Assignment</h2>
+
+
+<div id="channels">
+
+Select channel count first
+
+</div>
+
+
+
+<button onclick="createTimeline()">
+
+Create Timeline
+
+</button>
+
+
+</div>
+
+
+
+
+
+<div class="card">
+
+
+<h2>Timeline Editor</h2>
+
+
+<div id="timeline">
+
+Timeline will appear here
+
+</div>
+
+
+</div>
+
+
+
+
+<script>
+
+
+// =================================
+// BOARD PIN DATABASE
+// =================================
+
+
+// Safe pins recommended for beginners
+
+const safePins = {
+
+
+"Arduino UNO":[
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13"
+],
+
+
+"Arduino Nano":[
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13"
+],
+
+
+"Arduino Mega":[
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13",
+"D22","D23","D24","D25",
+"D26","D27","D28","D29",
+"D30","D31","D32","D33",
+"D34","D35","D36","D37",
+"D38","D39","D40","D41",
+"D42","D43","D44","D45",
+"D46","D47","D48","D49",
+"D50","D51","D52","D53"
+],
+
+
+"ESP8266":[
+"GPIO0",
+"GPIO2",
+"GPIO4",
+"GPIO5",
+"GPIO12",
+"GPIO13",
+"GPIO14",
+"GPIO15",
+"GPIO16"
+],
+
+
+"ESP32":[
+"GPIO0",
+"GPIO2",
+"GPIO4",
+"GPIO5",
+"GPIO12",
+"GPIO13",
+"GPIO14",
+"GPIO15",
+"GPIO16",
+"GPIO17",
+"GPIO18",
+"GPIO19",
+"GPIO21",
+"GPIO22",
+"GPIO23",
+"GPIO25",
+"GPIO26",
+"GPIO27",
+"GPIO32",
+"GPIO33"
+]
+
+};
+
+
+
+
+// Custom pins (all possible pins)
+
+
+const customPins = {
+
+
+"Arduino UNO":[
+"D0","D1",
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13",
+"A0","A1","A2","A3","A4","A5"
+],
+
+
+"Arduino Nano":[
+"D0","D1",
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13",
+"A0","A1","A2","A3","A4","A5"
+],
+
+
+"Arduino Mega":[
+"D0","D1","D2","D3",
+"D4","D5","D6","D7",
+"D8","D9","D10","D11",
+"D12","D13",
+"D22","D23","D24",
+"D25","D26","D27",
+"D28","D29","D30",
+"D31","D32","D33",
+"D34","D35","D36",
+"D37","D38","D39",
+"D40","D41","D42",
+"D43","D44","D45",
+"D46","D47","D48",
+"D49","D50","D51",
+"D52","D53"
+],
+
+
+"ESP8266":[
+"GPIO0",
+"GPIO1",
+"GPIO2",
+"GPIO3",
+"GPIO4",
+"GPIO5",
+"GPIO12",
+"GPIO13",
+"GPIO14",
+"GPIO15",
+"GPIO16"
+],
+
+
+"ESP32":[
+"GPIO0",
+"GPIO1",
+"GPIO2",
+"GPIO3",
+"GPIO4",
+"GPIO5",
+"GPIO6",
+"GPIO7",
+"GPIO8",
+"GPIO9",
+"GPIO10",
+"GPIO11",
+"GPIO12",
+"GPIO13",
+"GPIO14",
+"GPIO15",
+"GPIO16",
+"GPIO17",
+"GPIO18",
+"GPIO19",
+"GPIO21",
+"GPIO22",
+"GPIO23",
+"GPIO25",
+"GPIO26",
+"GPIO27",
+"GPIO32",
+"GPIO33",
+"GPIO34",
+"GPIO35",
+"GPIO36",
+"GPIO39"
+]
+
+};
+
+
+
+
+// Current available pins
+
+let availablePins=[];
+
+
+// =================================
+// BOARD CHANGE
+// =================================
+
+
+function boardChanged(){
+
+updatePinList();
+
+}
+
+
+
+// =================================
+// MODE CHANGE
+// =================================
+
+
+function modeChanged(){
+
+updatePinList();
+
+}
+
+
+
+
+function updatePinList(){
+
+
+
+let board =
+document.getElementById("board").value;
+
+
+let mode =
+document.getElementById("pinMode").value;
+
+
+
+if(mode=="safe"){
+
+availablePins =
+safePins[board];
+
+}
+
+else{
+
+availablePins =
+customPins[board];
+
+}
+
+
+
+document.getElementById("boardInfo").innerHTML=board;
+
+
+document.getElementById("pinInfo").innerHTML=
+availablePins.length;
+
+
+document.getElementById("maxInfo").innerHTML=
+availablePins.length;
+
+
+
+let channelBox =
+document.getElementById("channelCount");
+
+
+// Automatically set maximum
+
+channelBox.max =
+availablePins.length;
+
+
+channelBox.value =
+availablePins.length;
+
+
+}
+
+
+
+// =================================
+// CHANNEL LIMIT CHECK
+// =================================
+
+
+function channelLimitCheck(){
+
+
+let value =
+Number(document.getElementById("channelCount").value);
+
+
+
+let max =
+availablePins.length;
+
+
+
+if(value > max){
+
+alert(
+"Maximum available channels: "
++ max
+);
+
+
+document.getElementById("channelCount").value=max;
+
+
+}
+
+
+if(value < 1){
+
+document.getElementById("channelCount").value=1;
+
+}
+
+
+}
+
+
+
+
+// Initialize
+
+updatePinList();
+
+
+
+
+// =================================
+// CREATE CHANNELS
+// =================================
+
+
+let selectedPins=[];
+
+
+let frameData=[];
+
+
+
+function createChannels(){
+
+
+let count =
+Number(document.getElementById("channelCount").value);
+
+
+
+let html="";
+
+
+selectedPins=[];
+
+
+
+for(let i=0;i<count;i++){
+
+
+selectedPins.push(availablePins[i]);
+
+
+
+html += `
+
+
+<div class="channelBox">
+
+
+<b>
+CH ${i+1}
+</b>
+
+
+<select id="pin${i}" onchange="checkDuplicates()">
+
+
+${availablePins.map((pin,index)=>
+
+
+`<option value="${pin}" 
+${index==i?"selected":""}>
+
+${pin}
+
+</option>`
+
+
+).join("")}
+
+
+</select>
+
+
+</div>
+
+
+`;
+
+
+}
+
+
+
+document.getElementById("channels").innerHTML=html;
+
+
+
+checkDuplicates();
+
+
+
+}
+
+
+
+// =================================
+// DUPLICATE PIN CHECK
+// =================================
+
+
+function checkDuplicates(){
+
+
+let selects =
+document.querySelectorAll("#channels select");
+
+
+
+let values=[];
+
+
+
+selects.forEach(s=>{
+
+values.push(s.value);
+
+});
+
+
+
+selects.forEach((select,index)=>{
+
+
+for(let option of select.options){
+
+
+option.disabled=false;
+
+
+
+if(values.includes(option.value)
+&& option.value!=values[index]){
+
+
+option.disabled=true;
+
+
+}
+
+
+
+}
+
+
+});
+
+
+
+}
+
+
+
+
+// =================================
+// CREATE TIMELINE
+// =================================
+
+
+function createTimeline(){
+
+
+
+let channels =
+Number(document.getElementById("channelCount").value);
+
+
+
+let frames = 10;
+
+
+
+frameData=[];
+
+
+
+let html="<table>";
+
+
+
+html += "<tr>";
+
+html += "<th>Frame</th>";
+
+
+
+for(let c=0;c<channels;c++){
+
+
+html +=
+
+`<th>
+CH ${c+1}<br>
+${document.getElementById("pin"+c).value}
+</th>`;
+
+
+}
+
+
+
+html += "<th>Delay</th>";
+
+html += "</tr>";
+
+
+
+
+
+for(let f=0;f<frames;f++){
+
+
+frameData[f]=[];
+
+
+
+html += "<tr>";
+
+
+
+html +=
+
+`<td>
+${f+1}
+</td>`;
+
+
+
+
+for(let c=0;c<channels;c++){
+
+
+
+frameData[f][c]=0;
+
+
+
+html += `
+
+
+<td>
+
+
+<div class="cell"
+
+onclick="toggleCell(this,${f},${c})">
+
+
+</div>
+
+
+</td>
+
+
+`;
+
+
+}
+
+
+
+html += `
+
+
+<td>
+
+<input value="500">
+
+</td>
+
+
+`;
+
+
+
+html += "</tr>";
+
+
+
+}
+
+
+
+html += "</table>";
+
+
+
+document.getElementById("timeline").innerHTML=html;
+
+
+
+}
+
+
+
+
+// =================================
+// TIMELINE ON/OFF
+// =================================
+
+
+
+function toggleCell(element,frame,channel){
+
+
+
+if(element.classList.contains("on")){
+
+
+element.classList.remove("on");
+
+
+frameData[frame][channel]=0;
+
+
+}
+
+else{
+
+
+element.classList.add("on");
+
+
+frameData[frame][channel]=1;
+
+
+}
+
+
+
+console.log(frameData);
+
+
+}
+
+
+
+
+</script>
+
+
+</body>
+
+</html>
