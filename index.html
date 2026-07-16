@@ -3,7 +3,7 @@
 
 <head>
 
-<title>PWM Light Designer v0.3</title>
+<title>PWM Light Designer v0.4</title>
 
 <style>
 
@@ -13,25 +13,34 @@
 
 
 body{
+
     margin:0;
     padding:20px;
     background:#101010;
     color:white;
     font-family:Arial, sans-serif;
+
 }
+
 
 
 .container{
-    max-width:1100px;
+
+    max-width:1200px;
     margin:auto;
+
 }
+
 
 
 h1{
+
     text-align:center;
     color:#00ff88;
     font-size:36px;
+
 }
+
 
 
 .card{
@@ -43,6 +52,7 @@ h1{
     box-shadow:0 0 20px #000;
 
 }
+
 
 
 h2{
@@ -63,14 +73,15 @@ label{
 
 
 
-input,select{
+input,
+select{
 
     width:100%;
     padding:12px;
     margin-top:5px;
+    background:#303030;
     border:none;
     border-radius:8px;
-    background:#303030;
     color:white;
 
 }
@@ -91,6 +102,7 @@ button{
 }
 
 
+
 button:hover{
 
     background:#00ff66;
@@ -101,33 +113,11 @@ button:hover{
 
 .info{
 
-    margin-top:15px;
-    padding:15px;
     background:#252525;
+    padding:15px;
+    margin-top:15px;
     border-radius:10px;
     color:#00ff88;
-
-}
-
-
-
-.channelBox{
-
-    display:flex;
-    align-items:center;
-    gap:20px;
-    background:#252525;
-    margin:10px 0;
-    padding:12px;
-    border-radius:10px;
-
-}
-
-
-
-.channelBox select{
-
-    width:220px;
 
 }
 
@@ -142,19 +132,52 @@ button:hover{
 
 
 
-table{
+.channelBox{
 
-    width:100%;
-    border-collapse:collapse;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    background:#252525;
+    padding:12px;
+    margin:10px 0;
+    border-radius:10px;
 
 }
 
 
-td,th{
+
+.channelBox select{
+
+    width:250px;
+
+}
+
+
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+
+}
+
+
+
+th{
+
+    background:#333;
+    padding:10px;
+
+}
+
+
+
+td{
 
     border:1px solid #555;
-    padding:10px;
     text-align:center;
+    padding:8px;
 
 }
 
@@ -166,22 +189,40 @@ td,th{
     height:35px;
     background:#333;
     margin:auto;
-    border-radius:8px;
+    border-radius:7px;
     cursor:pointer;
 
 }
 
 
+
+.cell:hover{
+
+    background:#555;
+
+}
+
+
+
 .cell.on{
 
     background:#00ff66;
-    box-shadow:0 0 15px #00ff66;
+    box-shadow:
+    0 0 10px #00ff66,
+    0 0 20px #00ff66;
+
+}
+
+
+
+.delay{
+
+    width:80px;
 
 }
 
 
 </style>
-
 
 </head>
 
@@ -202,12 +243,15 @@ td,th{
 <h2>Project Setup</h2>
 
 
+
 <label>
 Project Name
 </label>
 
 <input id="projectName"
 placeholder="My Light Project">
+
+
 
 
 
@@ -219,13 +263,17 @@ Select Board
 <select id="board"
 onchange="boardChanged()">
 
+
 <option>Arduino UNO</option>
 <option>Arduino Nano</option>
 <option>Arduino Mega</option>
 <option>ESP8266</option>
 <option>ESP32</option>
 
+
 </select>
+
+
 
 
 
@@ -237,6 +285,8 @@ Pin Selection Mode
 <select id="pinMode"
 onchange="modeChanged()">
 
+
+
 <option value="safe">
 Safe Mode
 </option>
@@ -247,7 +297,9 @@ Custom Mode
 </option>
 
 
+
 </select>
+
 
 
 
@@ -257,26 +309,32 @@ Custom Mode
 
 Board:
 <span id="boardInfo">
-Arduino UNO
+-
 </span>
 
+
 <br><br>
+
 
 Available Pins:
 <span id="pinInfo">
-0
+-
 </span>
 
 
 <br><br>
 
+
 Maximum Channels:
 <span id="maxInfo">
-0
+-
 </span>
 
 
+
 </div>
+
+
 
 
 
@@ -288,7 +346,26 @@ Channel Count
 
 <input id="channelCount"
 type="number"
+min="1"
 onchange="channelLimitCheck()">
+
+
+
+
+
+
+<label>
+Frame Count
+</label>
+
+
+<input id="frameCount"
+type="number"
+min="1"
+value="10">
+
+
+
 
 
 
@@ -314,7 +391,7 @@ Create Channels
 
 <div id="channels">
 
-Select channel count first
+No channels created
 
 </div>
 
@@ -325,6 +402,7 @@ Select channel count first
 Create Timeline
 
 </button>
+
 
 
 </div>
@@ -351,15 +429,18 @@ Timeline will appear here
 
 
 
+
+<!-- JAVASCRIPT STARTS IN PART 2 -->
+
 <script>
 
 
-// =================================
-// BOARD PIN DATABASE
-// =================================
+// ======================================
+// PIN DATABASE
+// ======================================
 
 
-// Safe pins recommended for beginners
+// Recommended safe output pins
 
 const safePins = {
 
@@ -434,8 +515,8 @@ const safePins = {
 
 
 
-// Custom pins (all possible pins)
 
+// All pins for advanced users
 
 const customPins = {
 
@@ -449,6 +530,7 @@ const customPins = {
 ],
 
 
+
 "Arduino Nano":[
 "D0","D1",
 "D2","D3","D4","D5",
@@ -456,6 +538,7 @@ const customPins = {
 "D10","D11","D12","D13",
 "A0","A1","A2","A3","A4","A5"
 ],
+
 
 
 "Arduino Mega":[
@@ -477,6 +560,7 @@ const customPins = {
 ],
 
 
+
 "ESP8266":[
 "GPIO0",
 "GPIO1",
@@ -490,6 +574,7 @@ const customPins = {
 "GPIO15",
 "GPIO16"
 ],
+
 
 
 "ESP32":[
@@ -532,14 +617,16 @@ const customPins = {
 
 
 
-// Current available pins
 
 let availablePins=[];
 
 
-// =================================
-// BOARD CHANGE
-// =================================
+
+
+
+// ======================================
+// BOARD / MODE CONTROL
+// ======================================
 
 
 function boardChanged(){
@@ -548,11 +635,6 @@ updatePinList();
 
 }
 
-
-
-// =================================
-// MODE CHANGE
-// =================================
 
 
 function modeChanged(){
@@ -564,8 +646,8 @@ updatePinList();
 
 
 
-function updatePinList(){
 
+function updatePinList(){
 
 
 let board =
@@ -593,29 +675,32 @@ customPins[board];
 
 
 
-document.getElementById("boardInfo").innerHTML=board;
+document.getElementById("boardInfo").innerHTML =
+board;
 
 
-document.getElementById("pinInfo").innerHTML=
+
+document.getElementById("pinInfo").innerHTML =
 availablePins.length;
 
 
-document.getElementById("maxInfo").innerHTML=
+
+document.getElementById("maxInfo").innerHTML =
 availablePins.length;
 
 
 
-let channelBox =
+let channelInput =
 document.getElementById("channelCount");
 
 
-// Automatically set maximum
 
-channelBox.max =
+channelInput.max =
 availablePins.length;
 
 
-channelBox.value =
+
+channelInput.value =
 availablePins.length;
 
 
@@ -623,9 +708,12 @@ availablePins.length;
 
 
 
-// =================================
-// CHANNEL LIMIT CHECK
-// =================================
+
+
+
+// ======================================
+// CHANNEL LIMIT
+// ======================================
 
 
 function channelLimitCheck(){
@@ -635,7 +723,6 @@ let value =
 Number(document.getElementById("channelCount").value);
 
 
-
 let max =
 availablePins.length;
 
@@ -643,9 +730,10 @@ availablePins.length;
 
 if(value > max){
 
+
 alert(
 "Maximum available channels: "
-+ max
++max
 );
 
 
@@ -655,34 +743,36 @@ document.getElementById("channelCount").value=max;
 }
 
 
+
 if(value < 1){
+
 
 document.getElementById("channelCount").value=1;
 
-}
-
 
 }
 
 
 
+}
 
-// Initialize
+
+
+// Start system
 
 updatePinList();
 
 
 
-
-// =================================
-// CREATE CHANNELS
-// =================================
+// PART 3 CONTINUES HERE
 
 
-let selectedPins=[];
+// ======================================
+// CHANNEL CREATION
+// ======================================
 
 
-let frameData=[];
+let frameData = [];
 
 
 
@@ -697,14 +787,8 @@ Number(document.getElementById("channelCount").value);
 let html="";
 
 
-selectedPins=[];
-
-
 
 for(let i=0;i<count;i++){
-
-
-selectedPins.push(availablePins[i]);
 
 
 
@@ -719,14 +803,16 @@ CH ${i+1}
 </b>
 
 
+
 <select id="pin${i}" onchange="checkDuplicates()">
+
 
 
 ${availablePins.map((pin,index)=>
 
 
 `<option value="${pin}" 
-${index==i?"selected":""}>
+${index==i ? "selected":""}>
 
 ${pin}
 
@@ -736,13 +822,16 @@ ${pin}
 ).join("")}
 
 
+
 </select>
+
 
 
 </div>
 
 
 `;
+
 
 
 }
@@ -756,17 +845,20 @@ document.getElementById("channels").innerHTML=html;
 checkDuplicates();
 
 
-
 }
 
 
 
-// =================================
-// DUPLICATE PIN CHECK
-// =================================
+
+
+
+// ======================================
+// DUPLICATE PIN PROTECTION
+// ======================================
 
 
 function checkDuplicates(){
+
 
 
 let selects =
@@ -778,15 +870,16 @@ let values=[];
 
 
 
-selects.forEach(s=>{
+selects.forEach(select=>{
 
-values.push(s.value);
+values.push(select.value);
 
 });
 
 
 
 selects.forEach((select,index)=>{
+
 
 
 for(let option of select.options){
@@ -797,7 +890,7 @@ option.disabled=false;
 
 
 if(values.includes(option.value)
-&& option.value!=values[index]){
+&& option.value != values[index]){
 
 
 option.disabled=true;
@@ -806,8 +899,8 @@ option.disabled=true;
 }
 
 
-
 }
+
 
 
 });
@@ -819,9 +912,11 @@ option.disabled=true;
 
 
 
-// =================================
-// CREATE TIMELINE
-// =================================
+
+
+// ======================================
+// TIMELINE GENERATOR
+// ======================================
 
 
 function createTimeline(){
@@ -833,7 +928,8 @@ Number(document.getElementById("channelCount").value);
 
 
 
-let frames = 10;
+let frames =
+Number(document.getElementById("frameCount").value);
 
 
 
@@ -851,16 +947,25 @@ html += "<th>Frame</th>";
 
 
 
+
+
 for(let c=0;c<channels;c++){
 
 
-html +=
 
-`<th>
+let pin =
+document.getElementById("pin"+c).value;
+
+
+
+html += `
+
+<th>
 CH ${c+1}<br>
-${document.getElementById("pin"+c).value}
-</th>`;
+${pin}
+</th>
 
+`;
 
 }
 
@@ -877,6 +982,7 @@ html += "</tr>";
 for(let f=0;f<frames;f++){
 
 
+
 frameData[f]=[];
 
 
@@ -885,11 +991,14 @@ html += "<tr>";
 
 
 
-html +=
+html += `
 
-`<td>
-${f+1}
-</td>`;
+<td>
+Frame ${f+1}
+</td>
+
+`;
+
 
 
 
@@ -912,7 +1021,6 @@ html += `
 
 onclick="toggleCell(this,${f},${c})">
 
-
 </div>
 
 
@@ -922,7 +1030,10 @@ onclick="toggleCell(this,${f},${c})">
 `;
 
 
+
 }
+
+
 
 
 
@@ -931,7 +1042,8 @@ html += `
 
 <td>
 
-<input value="500">
+<input class="delay"
+value="500">
 
 </td>
 
@@ -961,10 +1073,12 @@ document.getElementById("timeline").innerHTML=html;
 
 
 
-// =================================
-// TIMELINE ON/OFF
-// =================================
 
+
+
+// ======================================
+// CELL ON/OFF CONTROL
+// ======================================
 
 
 function toggleCell(element,frame,channel){
@@ -999,7 +1113,6 @@ console.log(frameData);
 
 
 }
-
 
 
 
