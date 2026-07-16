@@ -913,19 +913,115 @@ option.disabled=true;
 
 
 
+// ======================================
+// TIMELINE DATA
+// ======================================
+
+let frameData = [];
+
 
 // ======================================
-// TIMELINE GENERATOR
+// CHANNEL CREATION
+// ======================================
+
+function createChannels(){
+
+let count =
+Number(document.getElementById("channelCount").value);
+
+let html="";
+
+
+for(let i=0;i<count;i++){
+
+html += `
+
+<div class="channelBox">
+
+<b>CH ${i+1}</b>
+
+<select id="pin${i}" onchange="checkDuplicates()">
+
+${availablePins.map((pin,index)=>
+
+`<option value="${pin}" ${index==i?"selected":""}>
+${pin}
+</option>`
+
+).join("")}
+
+</select>
+
+</div>
+
+`;
+
+}
+
+
+document.getElementById("channels").innerHTML=html;
+
+
+checkDuplicates();
+
+}
+
+
+
+
+// ======================================
+// DUPLICATE PIN PROTECTION
+// ======================================
+
+function checkDuplicates(){
+
+let selects =
+document.querySelectorAll("#channels select");
+
+
+let values=[];
+
+
+selects.forEach(s=>{
+values.push(s.value);
+});
+
+
+selects.forEach((select,index)=>{
+
+
+for(let option of select.options){
+
+option.disabled=false;
+
+
+if(values.includes(option.value)
+&& option.value!=values[index]){
+
+option.disabled=true;
+
+}
+
+}
+
+
+});
+
+
+}
+
+
+
+// ======================================
+// CREATE TIMELINE
 // ======================================
 
 
 function createTimeline(){
 
 
-
 let channels =
 Number(document.getElementById("channelCount").value);
-
 
 
 let frames =
@@ -934,6 +1030,43 @@ Number(document.getElementById("frameCount").value);
 
 
 frameData=[];
+
+
+
+for(let f=0;f<frames;f++){
+
+let row=[];
+
+for(let c=0;c<channels;c++){
+
+row.push(0);
+
+}
+
+frameData.push(row);
+
+}
+
+
+
+renderTimeline();
+
+
+}
+
+
+
+
+// ======================================
+// DRAW TIMELINE
+// ======================================
+
+
+function renderTimeline(){
+
+
+let channels =
+Number(document.getElementById("channelCount").value);
 
 
 
@@ -947,25 +1080,13 @@ html += "<th>Frame</th>";
 
 
 
-
-
 for(let c=0;c<channels;c++){
 
+html +=
 
-
-let pin =
-document.getElementById("pin"+c).value;
-
-
-
-html += `
-
-<th>
-CH ${c+1}<br>
-${pin}
-</th>
-
-`;
+`<th>
+CH ${c+1}
+</th>`;
 
 }
 
@@ -973,31 +1094,26 @@ ${pin}
 
 html += "<th>Delay</th>";
 
+html += "<th>Action</th>";
+
 html += "</tr>";
 
 
 
 
 
-for(let f=0;f<frames;f++){
-
-
-
-frameData[f]=[];
-
+frameData.forEach((row,f)=>{
 
 
 html += "<tr>";
 
 
 
-html += `
+html +=
 
-<td>
-Frame ${f+1}
-</td>
-
-`;
+`<td>
+${f+1}
+</td>`;
 
 
 
@@ -1007,46 +1123,46 @@ for(let c=0;c<channels;c++){
 
 
 
-frameData[f][c]=0;
+let state =
+row[c] ? "on" : "";
 
 
 
 html += `
 
-
 <td>
 
-
-<div class="cell"
+<div class="cell ${state}"
 
 onclick="toggleCell(this,${f},${c})">
 
 </div>
 
-
 </td>
 
-
 `;
-
-
 
 }
 
 
 
 
-
 html += `
+
+<td>
+
+<input class="delay" value="500">
+
+</td>
 
 
 <td>
 
-<input class="delay"
-value="500">
+<button onclick="removeFrame(${f})">
+Remove
+</button>
 
 </td>
-
 
 `;
 
@@ -1056,7 +1172,26 @@ html += "</tr>";
 
 
 
-}
+});
+
+
+
+
+html += `
+
+<tr>
+
+<td colspan="${channels+3}">
+
+<button onclick="addFrames()">
++ Add Frames
+</button>
+
+</td>
+
+</tr>
+
+`;
 
 
 
@@ -1067,17 +1202,84 @@ html += "</table>";
 document.getElementById("timeline").innerHTML=html;
 
 
+}
+
+
+
+// ======================================
+// ADD FRAMES
+// ======================================
+
+
+function addFrames(){
+
+
+let amount =
+Number(prompt("How many frames add?"));
+
+
+
+if(!amount || amount<1){
+
+return;
+
+}
+
+
+
+let channels =
+Number(document.getElementById("channelCount").value);
+
+
+
+for(let i=0;i<amount;i++){
+
+
+let row=[];
+
+
+for(let c=0;c<channels;c++){
+
+row.push(0);
+
+}
+
+
+frameData.push(row);
+
+
+}
+
+
+
+renderTimeline();
+
+
+}
+
+
+
+// ======================================
+// REMOVE FRAME
+// ======================================
+
+
+function removeFrame(index){
+
+
+frameData.splice(index,1);
+
+
+renderTimeline();
+
 
 }
 
 
 
 
-
-
-
 // ======================================
-// CELL ON/OFF CONTROL
+// ON/OFF CONTROL
 // ======================================
 
 
@@ -1085,13 +1287,12 @@ function toggleCell(element,frame,channel){
 
 
 
-if(element.classList.contains("on")){
-
-
-element.classList.remove("on");
+if(frameData[frame][channel]==1){
 
 
 frameData[frame][channel]=0;
+
+element.classList.remove("on");
 
 
 }
@@ -1099,10 +1300,9 @@ frameData[frame][channel]=0;
 else{
 
 
-element.classList.add("on");
-
-
 frameData[frame][channel]=1;
+
+element.classList.add("on");
 
 
 }
@@ -1113,8 +1313,6 @@ console.log(frameData);
 
 
 }
-
-
 
 </script>
 
