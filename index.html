@@ -1,0 +1,2657 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Arduino Visual Designer V2</title>
+
+
+<style>
+
+
+*{
+box-sizing:border-box;
+}
+
+
+
+body{
+
+background:#101010;
+color:white;
+font-family:Arial,sans-serif;
+padding:20px;
+
+}
+
+
+
+.container{
+
+max-width:1200px;
+margin:auto;
+
+}
+
+
+
+h1{
+
+text-align:center;
+color:#00ff88;
+
+}
+
+
+
+
+.card{
+
+background:#1d1d1d;
+
+padding:20px;
+
+margin:20px 0;
+
+border-radius:15px;
+
+box-shadow:0 0 15px #000;
+
+}
+
+
+
+
+h2{
+
+color:#00ff88;
+
+}
+
+
+
+label{
+
+display:block;
+
+margin-top:15px;
+
+color:#aaa;
+
+}
+
+
+
+
+input,select,textarea{
+
+
+width:100%;
+
+padding:12px;
+
+margin-top:5px;
+
+background:#303030;
+
+color:white;
+
+border:none;
+
+border-radius:8px;
+
+
+}
+
+
+
+
+button{
+
+
+background:#00c853;
+
+color:white;
+
+border:none;
+
+border-radius:8px;
+
+padding:10px 20px;
+
+margin-top:10px;
+
+cursor:pointer;
+
+
+}
+
+
+
+button:hover{
+
+background:#00ff66;
+
+}
+
+
+
+
+
+.info{
+
+
+background:#252525;
+
+padding:15px;
+
+border-radius:10px;
+
+color:#00ff88;
+
+margin-top:15px;
+
+
+}
+
+
+
+
+
+
+
+.channelBox{
+
+
+display:flex;
+
+align-items:center;
+
+gap:20px;
+
+background:#252525;
+
+padding:10px;
+
+margin:10px 0;
+
+border-radius:10px;
+
+
+}
+
+
+
+
+.channelBox select{
+
+width:250px;
+
+}
+
+
+
+
+
+table{
+
+
+width:100%;
+
+border-collapse:collapse;
+
+margin-top:20px;
+
+
+}
+
+
+
+
+
+th{
+
+
+background:#333;
+
+padding:10px;
+
+
+}
+
+
+
+
+td{
+
+
+border:1px solid #555;
+
+padding:8px;
+
+text-align:center;
+
+
+}
+
+
+
+
+
+
+
+.cell{
+
+
+width:35px;
+
+height:35px;
+
+background:#333;
+
+border-radius:6px;
+
+cursor:pointer;
+
+margin:auto;
+
+
+}
+
+
+
+
+.cell:hover{
+
+
+background:#555;
+
+
+}
+
+
+
+
+
+.cell.on{
+
+
+background:#00ff66;
+
+box-shadow:0 0 15px #00ff66;
+
+
+}
+
+
+
+
+
+
+
+/* REALTIME DELAY DISPLAY */
+
+
+.delayNormal{
+
+background:#333;
+
+}
+
+
+
+
+
+.delayFast{
+
+background:#0066ff;
+
+color:white;
+
+}
+
+
+
+
+
+.delaySlow{
+
+background:#00aa44;
+
+color:white;
+
+}
+
+
+
+
+
+.delayLong{
+
+background:#ff8800;
+
+color:white;
+
+}
+
+
+
+
+
+
+.delayBox{
+
+
+width:100px;
+
+
+}
+
+
+
+
+#delayTable input{
+
+
+width:100px;
+
+
+}
+
+
+
+
+
+
+
+.regionButton{
+
+
+background:#ff5252;
+
+
+}
+
+
+
+.regionButton:hover{
+
+
+background:#ff1744;
+
+
+}
+
+
+
+
+
+
+#arduinoCode{
+
+
+height:450px;
+
+font-family:monospace;
+
+color:#00ff66;
+
+background:#050505;
+
+
+}
+
+
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+
+<div class="container">
+
+
+
+<h1>
+💡 Arduino Visual Designer V2
+</h1>
+
+
+
+
+
+<div class="card">
+
+
+<h2>
+Project Setup
+</h2>
+
+
+
+
+<label>
+Project Name
+</label>
+
+
+<input id="projectName"
+placeholder="My LED Project">
+
+
+
+
+
+
+<label>
+Board
+</label>
+
+
+
+<select id="board"
+onchange="updatePins()">
+
+
+
+<option>
+Arduino UNO
+</option>
+
+
+<option>
+Arduino Nano
+</option>
+
+
+<option>
+Arduino Mega
+</option>
+
+
+<option>
+ESP8266
+</option>
+
+
+<option>
+ESP32
+</option>
+
+
+</select>
+
+
+
+
+
+<label>
+Pin Mode
+</label>
+
+
+<select id="pinMode"
+onchange="updatePins()">
+
+
+
+<option value="safe">
+Safe Pins
+</option>
+
+
+
+<option value="custom">
+Custom Pins
+</option>
+
+
+
+</select>
+
+
+
+<!-- CONTINUE PART 2 -->
+
+
+<div class="info">
+
+
+Board:
+<span id="boardInfo"></span>
+
+
+<br><br>
+
+
+Available Pins:
+<span id="pinInfo"></span>
+
+
+<br><br>
+
+
+Maximum Channels:
+<span id="maxInfo"></span>
+
+
+</div>
+
+
+
+
+
+
+<label>
+Channel Count
+</label>
+
+
+<input id="channelCount"
+type="number"
+min="1"
+onchange="limitChannels()">
+
+
+
+
+
+<label>
+Initial Frame Count
+</label>
+
+
+<input id="frameCount"
+type="number"
+value="10"
+min="1">
+
+
+
+
+
+<button onclick="createChannels()">
+
+Create Channels
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h2>
+Channel Pin Assignment
+</h2>
+
+
+
+
+<div id="channels">
+
+No channels created
+
+</div>
+
+
+
+
+
+<button onclick="createTimeline()">
+
+Create Timeline
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h2>
+Timeline Editor
+</h2>
+
+
+
+<div id="timeline">
+
+Timeline will appear here
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h2>
+⏱ Delay Control
+</h2>
+
+
+
+<label>
+Default Delay (ms)
+</label>
+
+
+<input id="defaultDelay"
+type="number"
+value="500">
+
+
+
+
+
+<button onclick="setDefaultDelay()">
+
+Apply Default Delay
+
+</button>
+
+
+
+
+
+
+<h2>
+Delay Regions
+</h2>
+
+
+
+
+<table id="delayTable">
+
+
+<tr>
+
+<th>
+Start Frame
+</th>
+
+
+<th>
+End Frame
+</th>
+
+
+<th>
+Delay
+</th>
+
+
+<th>
+Action
+</th>
+
+
+</tr>
+
+
+</table>
+
+
+
+
+
+<button onclick="addDelayRegion()">
+
++ Add Delay Region
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h2>
+⚡ Arduino Code Generator
+</h2>
+
+
+
+
+
+<button onclick="generateArduinoCode()">
+
+Generate Arduino Code
+
+</button>
+
+
+
+
+
+
+<textarea id="arduinoCode">
+
+Generated Arduino code will appear here...
+
+</textarea>
+
+
+
+
+
+<button onclick="copyCode()">
+
+📋 Copy Code
+
+</button>
+
+
+
+
+
+<button onclick="downloadCode()">
+
+⬇ Download .ino
+
+</button>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+
+// ===============================
+// PIN DATABASE
+// ===============================
+
+
+
+const safePins = {
+
+
+
+"Arduino UNO":[
+
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13"
+
+],
+
+
+
+
+
+"Arduino Nano":[
+
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13"
+
+],
+
+
+
+
+
+"Arduino Mega":[
+
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13",
+"D22","D23","D24","D25",
+"D26","D27","D28","D29",
+"D30","D31","D32","D33",
+"D34","D35","D36","D37",
+"D38","D39","D40","D41",
+"D42","D43","D44","D45",
+"D46","D47","D48","D49",
+"D50","D51","D52","D53"
+
+],
+
+
+
+
+"ESP8266":[
+
+"GPIO0",
+"GPIO2",
+"GPIO4",
+"GPIO5",
+"GPIO12",
+"GPIO13",
+"GPIO14",
+"GPIO15",
+"GPIO16"
+
+],
+
+
+
+
+
+"ESP32":[
+
+"GPIO0",
+"GPIO2",
+"GPIO4",
+"GPIO5",
+"GPIO12",
+"GPIO13",
+"GPIO14",
+"GPIO15",
+"GPIO16",
+"GPIO17",
+"GPIO18",
+"GPIO19",
+"GPIO21",
+"GPIO22",
+"GPIO23",
+"GPIO25",
+"GPIO26",
+"GPIO27",
+"GPIO32",
+"GPIO33"
+
+]
+
+
+};
+
+
+
+
+// CONTINUE PART 3
+
+// ===============================
+// CUSTOM PIN DATABASE
+// ===============================
+
+
+const customPins = {
+
+
+"Arduino UNO":[
+
+"D0","D1",
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13",
+"A0","A1","A2","A3","A4","A5"
+
+],
+
+
+
+"Arduino Nano":[
+
+"D0","D1",
+"D2","D3","D4","D5",
+"D6","D7","D8","D9",
+"D10","D11","D12","D13",
+"A0","A1","A2","A3","A4","A5"
+
+],
+
+
+
+
+"Arduino Mega":[
+
+"D0","D1","D2","D3",
+"D4","D5","D6","D7",
+"D8","D9","D10","D11",
+"D12","D13",
+
+"D22","D23","D24",
+"D25","D26","D27",
+"D28","D29","D30",
+"D31","D32","D33",
+"D34","D35","D36",
+"D37","D38","D39",
+"D40","D41","D42",
+"D43","D44","D45",
+"D46","D47","D48",
+"D49","D50","D51",
+"D52","D53",
+
+"A0","A1","A2","A3","A4","A5"
+
+],
+
+
+
+
+"ESP8266":[
+
+"GPIO0",
+"GPIO1",
+"GPIO2",
+"GPIO3",
+"GPIO4",
+"GPIO5",
+"GPIO12",
+"GPIO13",
+"GPIO14",
+"GPIO15",
+"GPIO16"
+
+],
+
+
+
+
+"ESP32":[
+
+"GPIO0",
+"GPIO1",
+"GPIO2",
+"GPIO3",
+"GPIO4",
+"GPIO5",
+"GPIO12",
+"GPIO13",
+"GPIO14",
+"GPIO15",
+"GPIO16",
+"GPIO17",
+"GPIO18",
+"GPIO19",
+"GPIO21",
+"GPIO22",
+"GPIO23",
+"GPIO25",
+"GPIO26",
+"GPIO27",
+"GPIO32",
+"GPIO33",
+"GPIO34",
+"GPIO35",
+"GPIO36",
+"GPIO39"
+
+]
+
+
+};
+
+
+
+
+
+
+
+let availablePins=[];
+
+
+
+// LED DATA ONLY
+let frameData=[];
+
+
+
+// DELAY SYSTEM
+
+let defaultDelay=500;
+
+
+let delayRegions=[];
+
+
+
+
+
+
+
+// ===============================
+// UPDATE PINS
+// ===============================
+
+
+function updatePins(){
+
+
+
+let board =
+document.getElementById("board").value;
+
+
+
+let mode =
+document.getElementById("pinMode").value;
+
+
+
+
+if(mode=="safe")
+
+availablePins=safePins[board];
+
+
+else
+
+availablePins=customPins[board];
+
+
+
+
+document.getElementById("boardInfo").innerHTML=board;
+
+
+
+document.getElementById("pinInfo").innerHTML=
+availablePins.length;
+
+
+
+document.getElementById("maxInfo").innerHTML=
+availablePins.length;
+
+
+
+
+let ch =
+document.getElementById("channelCount");
+
+
+
+ch.max=availablePins.length;
+
+
+
+ch.value=availablePins.length;
+
+
+
+}
+
+
+
+updatePins();
+
+
+
+
+
+
+
+
+function limitChannels(){
+
+
+
+let value=
+Number(document.getElementById("channelCount").value);
+
+
+
+if(value>availablePins.length){
+
+
+
+alert(
+"Maximum channels : "+availablePins.length
+);
+
+
+
+document.getElementById("channelCount").value=
+availablePins.length;
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// CREATE CHANNELS
+// ===============================
+
+
+function createChannels(){
+
+
+let count=
+Number(document.getElementById("channelCount").value);
+
+
+
+let html="";
+
+
+
+for(let i=0;i<count;i++){
+
+
+
+html+=`
+
+<div class="channelBox">
+
+
+<b>
+CH ${i+1}
+</b>
+
+
+
+<select id="pin${i}"
+onchange="checkDuplicates()">
+
+
+
+${availablePins.map((p,index)=>
+
+
+`
+<option value="${p}" ${index==i?"selected":""}>
+${p}
+</option>
+
+`
+
+).join("")}
+
+
+
+</select>
+
+
+
+</div>
+
+
+`;
+
+}
+
+
+
+document.getElementById("channels").innerHTML=html;
+
+
+
+checkDuplicates();
+
+
+}
+
+
+
+
+
+
+
+function checkDuplicates(){
+
+
+
+let selects =
+document.querySelectorAll("#channels select");
+
+
+
+let used=[];
+
+
+
+selects.forEach(s=>used.push(s.value));
+
+
+
+selects.forEach((s,i)=>{
+
+
+for(let option of s.options){
+
+
+
+option.disabled=false;
+
+
+
+if(
+used.includes(option.value)
+&& option.value!=used[i]
+){
+
+
+option.disabled=true;
+
+
+}
+
+
+}
+
+
+});
+
+
+}
+
+
+
+
+
+
+// ===============================
+// CREATE TIMELINE
+// ===============================
+
+
+function createTimeline(){
+
+
+
+let channels=
+Number(document.getElementById("channelCount").value);
+
+
+
+let frames=
+Number(document.getElementById("frameCount").value);
+
+
+
+
+frameData=[];
+
+
+
+for(let i=0;i<frames;i++){
+
+
+
+frameData.push({
+
+state:new Array(channels).fill(0)
+
+});
+
+
+}
+
+
+
+
+renderTimeline();
+
+
+renderDelayRegions();
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// GET REALTIME FRAME DELAY
+// ===============================
+
+
+function getFrameDelay(frameNumber){
+
+
+
+let delay=defaultDelay;
+
+
+
+
+delayRegions.forEach(region=>{
+
+
+if(
+frameNumber>=region.start &&
+frameNumber<=region.end
+){
+
+
+delay=region.delay;
+
+
+}
+
+
+});
+
+
+
+return delay;
+
+
+}
+
+
+
+
+
+// ===============================
+// TIMELINE RENDER
+// ===============================
+
+
+function renderTimeline(){
+
+
+
+let channels=
+Number(document.getElementById("channelCount").value);
+
+
+
+let html="<table>";
+
+
+
+html+=`
+
+<tr>
+
+<th>
+Frame
+</th>
+
+`;
+
+
+
+for(let c=0;c<channels;c++){
+
+
+html+=`
+
+<th>
+CH${c+1}
+</th>
+
+`;
+
+}
+
+
+
+html+=`
+
+<th>
+Delay
+</th>
+
+
+<th>
+Action
+</th>
+
+
+</tr>
+
+`;
+
+
+
+
+frameData.forEach((frame,index)=>{
+
+
+
+let currentDelay=
+getFrameDelay(index+1);
+
+
+
+let delayClass="delayNormal";
+
+
+
+if(currentDelay<=100)
+
+delayClass="delayFast";
+
+
+else if(currentDelay>=1000)
+
+delayClass="delayLong";
+
+
+else if(currentDelay<500)
+
+delayClass="delaySlow";
+
+
+
+
+html+=`
+
+<tr>
+
+
+<td>
+${index+1}
+</td>
+
+
+`;
+
+
+
+frame.state.forEach((v,c)=>{
+
+
+html+=`
+
+<td>
+
+<div class="cell ${v?"on":""}"
+
+onclick="toggleCell(this,${index},${c})">
+
+</div>
+
+</td>
+
+
+`;
+
+});
+
+
+
+html+=`
+
+<td class="${delayClass}">
+
+${currentDelay} ms
+
+</td>
+
+
+<td>
+
+<button onclick="removeFrame(${index})">
+
+Remove
+
+</button>
+
+</td>
+
+
+</tr>
+
+`;
+
+
+
+});
+
+
+
+
+html+=`
+
+<tr>
+
+<td colspan="${channels+2}">
+
+
+<button onclick="addFrames()">
+
++ Add Frames
+
+</button>
+
+
+<button onclick="removeFramesRange()">
+
+- Remove Frames
+
+</button>
+
+
+</td>
+
+</tr>
+
+`;
+
+
+
+html+="</table>";
+
+
+
+
+document.getElementById("timeline").innerHTML=html;
+
+
+
+}
+
+
+
+
+// CONTINUE PART 4
+
+// ===============================
+// FRAME FUNCTIONS
+// ===============================
+
+
+function toggleCell(el,frame,channel){
+
+
+frameData[frame].state[channel]^=1;
+
+
+el.classList.toggle("on");
+
+
+}
+
+
+
+
+
+
+
+function addFrames(){
+
+
+
+let amount=
+Number(prompt("How many frames add?"));
+
+
+
+if(!amount)
+return;
+
+
+
+let channels=
+Number(document.getElementById("channelCount").value);
+
+
+
+for(let i=0;i<amount;i++){
+
+
+frameData.push({
+
+state:new Array(channels).fill(0)
+
+});
+
+
+}
+
+
+
+renderTimeline();
+
+
+
+}
+
+
+
+
+
+
+
+
+function removeFrame(index){
+
+
+
+frameData.splice(index,1);
+
+
+
+renderTimeline();
+
+
+
+}
+
+
+
+
+
+
+
+function removeFramesRange(){
+
+
+
+let start=
+Number(prompt("Remove from frame:"));
+
+
+
+let end=
+Number(prompt("Remove to frame:"));
+
+
+
+
+if(!start || !end)
+return;
+
+
+
+if(start<1)
+start=1;
+
+
+
+if(end>frameData.length)
+end=frameData.length;
+
+
+
+frameData.splice(
+start-1,
+end-start+1
+);
+
+
+
+renderTimeline();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// DELAY REGION SYSTEM
+// ===============================
+
+
+
+
+function setDefaultDelay(){
+
+
+
+defaultDelay=
+Number(
+document.getElementById("defaultDelay").value
+);
+
+
+
+renderTimeline();
+
+
+
+}
+
+
+
+
+
+
+
+
+function addDelayRegion(){
+
+
+
+let start=
+Number(prompt("Start frame:"));
+
+
+
+let end=
+Number(prompt("End frame:"));
+
+
+
+let delay=
+Number(prompt("Delay milliseconds:"));
+
+
+
+
+
+if(!start || !end || !delay)
+return;
+
+
+
+
+
+delayRegions.push({
+
+
+start:start,
+
+
+end:end,
+
+
+delay:delay
+
+
+});
+
+
+
+
+
+renderDelayRegions();
+
+
+renderTimeline();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function renderDelayRegions(){
+
+
+
+let table=
+document.getElementById("delayTable");
+
+
+
+if(!table)
+return;
+
+
+
+
+
+let html=`
+
+<tr>
+
+<th>
+Start Frame
+</th>
+
+
+<th>
+End Frame
+</th>
+
+
+<th>
+Delay
+</th>
+
+
+<th>
+Action
+</th>
+
+
+</tr>
+
+`;
+
+
+
+
+
+delayRegions.forEach((r,index)=>{
+
+
+
+html+=`
+
+<tr>
+
+
+<td>
+
+${r.start}
+
+</td>
+
+
+<td>
+
+${r.end}
+
+</td>
+
+
+
+<td>
+
+${r.delay} ms
+
+</td>
+
+
+
+
+<td>
+
+
+<button class="regionButton"
+
+onclick="removeDelayRegion(${index})">
+
+Remove
+
+</button>
+
+
+
+</td>
+
+
+</tr>
+
+
+`;
+
+
+
+});
+
+
+
+
+
+table.innerHTML=html;
+
+
+
+}
+
+
+
+
+
+
+
+function removeDelayRegion(index){
+
+
+
+delayRegions.splice(index,1);
+
+
+
+renderDelayRegions();
+
+
+renderTimeline();
+
+
+}
+
+
+
+
+
+
+// =====================================
+// STARTUP
+// =====================================
+
+
+renderDelayRegions();
+
+
+
+
+// CONTINUE PART 5
+
+// =====================================
+// ARDUINO CODE GENERATOR
+// =====================================
+
+
+function generateArduinoCode(){
+
+
+
+let project =
+document.getElementById("projectName").value;
+
+
+
+if(project=="")
+project="My_Project";
+
+
+
+
+let board =
+document.getElementById("board").value;
+
+
+
+
+let channels =
+Number(document.getElementById("channelCount").value);
+
+
+
+
+let pins=[];
+
+
+
+
+for(let i=0;i<channels;i++){
+
+
+pins.push(
+document.getElementById("pin"+i).value
+);
+
+
+}
+
+
+
+
+
+
+let bytesPerFrame =
+Math.ceil(channels/8);
+
+
+
+
+
+
+let code=`
+
+/*
+=====================================
+
+Arduino Visual Designer V2
+
+Project : ${project}
+
+Board : ${board}
+
+Channels : ${channels}
+
+Frames : ${frameData.length}
+
+
+8 BIT PACKED LED DATA
+
+
+=====================================
+*/
+
+
+#include <Arduino.h>
+
+
+
+`;
+
+
+
+
+
+
+// PIN DEFINITIONS
+
+
+pins.forEach((pin,index)=>{
+
+
+
+let outputPin;
+
+
+
+// KEEP ANALOG PINS CORRECT
+
+
+if(pin.startsWith("A"))
+
+{
+
+outputPin=pin;
+
+}
+
+
+
+else if(pin.startsWith("GPIO"))
+
+{
+
+outputPin=pin.replace("GPIO","");
+
+}
+
+
+else
+
+{
+
+outputPin=pin.replace("D","");
+
+}
+
+
+
+
+
+code+=`
+
+#define CH${index+1} ${outputPin}
+
+`;
+
+
+
+});
+
+
+
+
+
+
+
+code+=`
+
+#define TOTAL_FRAMES ${frameData.length}
+
+#define BYTES_PER_FRAME ${bytesPerFrame}
+
+
+#define DEFAULT_DELAY ${defaultDelay}
+
+
+
+`;
+
+
+
+
+
+
+
+
+
+// LED DATA
+
+
+code+=`
+
+const uint8_t animation[TOTAL_FRAMES][BYTES_PER_FRAME] PROGMEM =
+{
+
+
+`;
+
+
+
+
+
+
+
+
+frameData.forEach(frame=>{
+
+
+code+="{";
+
+
+
+for(let b=0;b<bytesPerFrame;b++){
+
+
+
+let value=0;
+
+
+
+for(let bit=0;bit<8;bit++){
+
+
+
+let ledIndex=(b*8)+bit;
+
+
+
+if(
+ledIndex<channels &&
+frame.state[ledIndex]
+)
+
+{
+
+
+value |= (1<<bit);
+
+
+}
+
+
+}
+
+
+
+
+code+="0b"+
+value.toString(2).padStart(8,"0");
+
+
+
+if(b<bytesPerFrame-1)
+
+code+=",";
+
+
+}
+
+
+
+code+="},\n";
+
+
+
+});
+
+
+
+
+
+code+=`
+
+};
+
+
+
+`;
+
+
+
+
+
+
+
+
+// DELAY REGIONS
+
+
+code+=`
+
+struct DelayRegion
+
+{
+
+
+uint16_t startFrame;
+
+
+uint16_t endFrame;
+
+
+uint16_t delayTime;
+
+
+};
+
+
+
+`;
+
+
+
+
+
+
+code+=`
+
+const DelayRegion delayList[] PROGMEM =
+{
+
+
+`;
+
+
+
+
+
+delayRegions.forEach(r=>{
+
+
+code+=`
+
+{${r.start},${r.end},${r.delay}},
+
+
+`;
+
+
+
+});
+
+
+
+
+
+code+=`
+
+};
+
+
+
+#define DELAY_COUNT ${delayRegions.length}
+
+
+
+`;
+
+
+
+
+
+
+
+
+// SETUP
+
+
+code+=`
+
+void setup()
+
+{
+
+
+`;
+
+
+
+
+
+
+for(let i=0;i<channels;i++){
+
+
+
+code+=`
+
+pinMode(CH${i+1},OUTPUT);
+
+
+`;
+
+}
+
+
+
+code+=`
+
+}
+
+
+`;
+
+
+
+
+
+
+
+
+// LOOP
+
+
+code+=`
+
+void loop()
+
+{
+
+
+for(uint16_t frame=0;
+
+frame<TOTAL_FRAMES;
+
+frame++)
+
+{
+
+
+
+uint16_t currentDelay =
+DEFAULT_DELAY;
+
+
+
+
+for(uint8_t r=0;r<DELAY_COUNT;r++)
+
+{
+
+
+uint16_t start =
+pgm_read_word(&delayList[r].startFrame);
+
+
+
+uint16_t end =
+pgm_read_word(&delayList[r].endFrame);
+
+
+
+
+if(
+(frame+1)>=start &&
+(frame+1)<=end
+)
+
+{
+
+
+currentDelay =
+pgm_read_word(&delayList[r].delayTime);
+
+
+}
+
+
+}
+
+
+
+
+
+`;
+
+
+
+
+
+
+
+
+
+for(let i=0;i<channels;i++){
+
+
+
+let byteIndex=
+Math.floor(i/8);
+
+
+
+let bitIndex=
+i%8;
+
+
+
+
+
+code+=`
+
+digitalWrite(
+
+CH${i+1},
+
+pgm_read_byte(
+&animation[frame][${byteIndex}]
+)
+&
+(1<<${bitIndex})
+
+);
+
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+code+=`
+
+delay(currentDelay);
+
+
+
+}
+
+
+
+}
+
+
+
+`;
+
+
+
+
+
+
+
+
+document.getElementById("arduinoCode").value=code;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// COPY CODE
+// =====================================
+
+
+function copyCode(){
+
+
+
+let text=
+document.getElementById("arduinoCode");
+
+
+
+text.select();
+
+
+
+document.execCommand("copy");
+
+
+
+alert("Arduino code copied!");
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// DOWNLOAD CODE
+// =====================================
+
+
+function downloadCode(){
+
+
+
+let project=
+document.getElementById("projectName").value;
+
+
+
+if(project=="")
+project="My_Project";
+
+
+
+
+
+let code=
+document.getElementById("arduinoCode").value;
+
+
+
+
+
+
+let blob=
+new Blob(
+
+[code],
+
+{
+
+type:"text/plain"
+
+}
+
+);
+
+
+
+
+
+
+
+let link=
+document.createElement("a");
+
+
+
+
+
+link.href=
+URL.createObjectURL(blob);
+
+
+
+
+
+link.download=
+project.replace(/\s+/g,"_")+".ino";
+
+
+
+
+
+link.click();
+
+
+
+}
+
+
+
+</script>
+
+
+</body>
+
+
+</html>
